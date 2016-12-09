@@ -1,0 +1,11 @@
+
+config rs232 'RS232'
+	option rs232_0 '1'
+	option baud_0 '115200'
+	option rs232_1 '0'
+	option baud_1 '115200'
+	option data_bit_1 '8'
+	option stop_bit_1 '1'
+	option check_bit_1 '0'
+	option stream_control_1 '0'
+	option ipport   '8080'
