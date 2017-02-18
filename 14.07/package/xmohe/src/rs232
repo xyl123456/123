@@ -1,3 +1,4 @@
+
 config rs232 'RS232'
 	option rs232_cfg '1'
 	option rs232_baud '9600'
@@ -6,6 +7,6 @@ config rs232 'RS232'
 	option rs232_check_bit '0'
 	option rs232_stream_control '0'
 	option ser_ip '192.168.1.127'
-	option ser_port '8080'
-	option client_port '1234'
+	option ser_port '1234'
+	option client_port '8088'
 

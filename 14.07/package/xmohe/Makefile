@@ -41,6 +41,9 @@ endef
 define Package/xmohe/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/xmohe $(1)/usr/sbin/
+	$(INSTALL_DIR) $(1)/www
+	$(CP) ./php/*  $(1)/www/
+
 endef
 
 $(eval $(call BuildPackage,xmohe))

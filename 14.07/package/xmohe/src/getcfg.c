@@ -208,15 +208,15 @@ int GetCFGValue( char* CFGBuffer, int Buflen, char *pKeyName, char *pItemName )
 }
 
 
-int GetConfigValue( char* FileName,char *RS232,int BAD[],int  IPPORT[])
+void GetConfigValue( char* FileName)
 {
 	FILE*	fp;
-	char  	ValueStr[80];
     	char    	Buffer[1000], str[100];
-	char 		rs232_buf[5];
+	char 		rs232_buf;
 	int		nBytes;
-	int		i;
-	int		baud[5];
+	int		baud;
+	int 		tmp_port;
+	
 	fp = fopen( FileName, "rt" );
 	if( fp!=NULL )
 	{
@@ -225,47 +225,43 @@ int GetConfigValue( char* FileName,char *RS232,int BAD[],int  IPPORT[])
 		fclose( fp );
 		if( nBytes > 0 )
 		{
-		//注意串口0就是rs232_1
-		if (0 ==  GetCFGValue( Buffer, nBytes, "rs232_1", "'1'")) {
-				rs232_buf[0]='1';
-				//sprintf(pConfigInfo->ipaddr, "ifconfig eth0 %s", ValueStr);
-				baud[0]=GetValue(Buffer,nBytes,"baud_1");
-				printf("I get the RS232_1,the baud is %d\n",baud[0]);
+		//注意串口0就是rs232
+		if (0 ==  GetCFGValue( Buffer, nBytes, "rs232_cfg", "'1'")) 
+			{
+				rs232_buf='1';
+				baud=GetValue(Buffer,nBytes,"rs232_baud");
+				printf("I get the RS232,the baud is %d\n",baud);
 				
-			} else {
-				rs232_buf[0]='0';
-				baud[0]=0;
-				//strcpy( pConfigInfo->ipaddr , "ifconfig eth0 192.168.1.110");
-				printf("the RS232_1 is not ready\n");
-			}
-			if (0 ==  GetCFGValue( Buffer, nBytes, "rs232_2", "'1'")) {
-				rs232_buf[1]='1';
-				//sprintf(pConfigInfo->ipaddr, "ifconfig eth0 %s", ValueStr);
-				baud[1]=GetValue(Buffer,nBytes,"baud_2");
-				printf("I get the RS232_2,the baud is %d\n",baud[1]);
-				
-			} else {
-				rs232_buf[1]='0';
-				baud[1]=0;
-				//strcpy( pConfigInfo->ipaddr , "ifconfig eth0 192.168.1.110");
-				printf("the RS232_2 is not ready\n");
+			} 
+		else {
+				rs232_buf='0';
+				baud=0;
+				printf("the RS232 is not ready\n");
 			}
 			// get serial parameters
-			int n;
-			for ( n=0;n<2;n++)
+	
+			RS232_BUF=rs232_buf;
+			RS232_BAUD=baud;
+			tmp_port=GetValue(Buffer,nBytes,"client_port");
+			if(tmp_port>0)
+			client_port=tmp_port;
+			else
 				{
-				RS232[n]=rs232_buf[n];
-				BAD[n]=baud[n];
+				client_port=0;
+				tmp_port=0;
 				}
-			//printf("the buf is %s\n",RS232);
-			
-			IPPORT[0]=GetValue(Buffer,nBytes,"local_ipport");//获取本地端口
-			IPPORT[1]=GetValue(Buffer,nBytes,"ser_ipport");//获取远程端口
-			GetString( Buffer,nBytes, "addr_ip" );//获取IP地址
-			GetDNS_String( Buffer,nBytes, "dns_addr" );//获取DNS地址
+			tmp_port=GetValue(Buffer,nBytes,"ser_port");
+			if(tmp_port>0)
+			ser_port=tmp_port;//获取远程端口
+			else
+				{
+				ser_port=0;
+				tmp_port=0;
+				}
+			GetString( Buffer,nBytes, "ser_ip" );//获取IP地址
+			//GetDNS_String( Buffer,nBytes, "dns_addr" );//获取DNS地址
 		}
 	}
-	return 0;
 }
 
 /*
@@ -303,25 +299,60 @@ int iscorrectcfg(CONFIG_INFO* pConfigInfo)
 //串口数据处理函数
 void serialdata_handle(char buff[],int len)
 {
-	int send_serial;
+	int send_fd;
 	int k;
 	if(NULL==head){
 		return;
 		}
 	Node * p = head->pNext;
 	while(NULL!=p){
-		send_serial = p->fd_data;
-		k=write(send_serial,buff,len);
-		printf("write %d is %s\n",k,buff);
+		send_fd = p->fd_data;
+		k=write(send_fd,buff,len);
+		//printf("write %d is %s\n",k,buff);
 		p = p->pNext;
 		}
 	free(p);
 	return;
 }
 
+
+
 void handle_sigchld(int sig)
 {
 	while(waitpid(-1,NULL,WNOHANG)>0)
 		;
 }
+/*
+int ComRd(int portNo,char buf[],int maxCnt,int Timeout)
+{
+	int actualRead = 0;
+	int pos=0;
+	fd_set rfds;
+	struct timeval tv;
+ 	int retval;
+	FD_ZERO(&rfds);
+	FD_SET(portNo,&rfds);
+	tv.tv_sec= Timeout/1000;
+	tv.tv_usec= (Timeout%1000)*1000;
+	while(FD_ISSET(portNo,&rfds)){
+		FD_ZERO(&rfds);
+		FD_SET(portNo,&rfds);
+		retval = select(portNo+1,&rfds,NULL,NULL,&tv);
+		if(retval == -1){
+			break;
+		}
+		else if(retval>0){
+		actualRead= read(portNo, buf, maxCnt);
+		pos=pos+actualRead;
+		FD_ZERO(&rfds);
+		FD_SET(portNo,&rfds);
+		
+		}
+		else{
+			
+		}
+	}
+	return actualRead;
+}
+*/
 

@@ -4,7 +4,7 @@
 
 / {
 	compatible = "ralink,mt7620a-eval-board", "ralink,mt7620a-soc";
-	model = "LYSOC LY7620";
+	model = "mt7620a xyl";
 
 	palmbus@10000000 {
 		spi@b00 {
@@ -38,7 +38,7 @@
 
 				partition@50000 {
 					label = "firmware";
-					reg = <0x50000 0xfb0000>;
+					reg = <0x50000 0x1fb0000>;
 				};
 			};
 		};
@@ -47,9 +47,8 @@
 	pinctrl {
 		state_default: pinctrl0 {
 			default {
-				ralink,group = "uartf","wled";
-				ralink,function = "gpio";
-				
+				ralink,group ="jtag","wled";
+				ralink,function = "gpio";	
 			};
 		};
 	};
@@ -60,33 +59,9 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&rgmii1_pins &rgmii2_pins &mdio_pins>;
 
-		ralink,port-map = "llllw";
-		port@4 {
-			status = "okay";
-			phy-mode = "rgmii";
-			phy-handle = <&phy4>;
-		};
-
-		port@5 {
-			status = "okay";
-			phy-mode = "rgmii";
-			phy-handle = <&phy5>;
-		};
-
-		mdio-bus {
-			status = "okay";
-
-			phy4: ethernet-phy@4 {
-				reg = <4>;
-				phy-mode = "rgmii";
-			};
-
-			phy5: ethernet-phy@5 {
-				reg = <5>;
-				phy-mode = "rgmii";
-			};
-		};
+		ralink,port-map = "llllw";	
 	};
+
 	sdhci@10130000 {
 		status = "okay";
 	};
